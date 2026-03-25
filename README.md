@@ -10,18 +10,17 @@ The website prioritizes visual impact and user experience through sophisticated 
 
 ## Implemented Features
 
-- **Multi-page site structure** — Home, About, Services, Media gallery, Contact pages with client-side routing
-- **Scroll-linked video scrubbing** — Hero section video plays based on scroll position (requestAnimationFrame-driven)
-- **Smooth scroll experience** — Lenis scroll hijacking for pixel-perfect scroll control
-- **Scroll reveal animations** — Intersection Observer-based element reveal on scroll (manually triggered, not library-dependent)
-- **Custom animated cursor** — Dot + ring cursor with hover states; scales on interactive elements
-- **WhatsApp integration** — Floating action button for direct contact
-- **Contact form** — Client-side validation (email, phone, required fields) with honeypot anti-spam; **note: form data is not currently submitted to any backend**
-- **Media gallery** — Categorized photo galleries (hoardings, railway, mall, airport, highway, city) with lightbox modal
-- **Responsive design** — Mobile, tablet, desktop optimization via Tailwind CSS
-- **SEO optimization** — Metadata, Open Graph tags, robots directives, structured for search engines
-- **Security headers** — Content-Security-Policy, HSTS, X-Frame-Options, Permissions-Policy, referrer policy
-- **Dark theme UI** — Glassmorphic cards, cyan/blue electric accent colors, typography hierarchy
+- **Shared Data Layer** — Centralized all static data in `/lib/data.ts` and types in `/types/index.ts` for a single source of truth.
+- **Backend API Routes** — Implemented `/api/contact` with server-side validation, rate limiting, and sanitization. Added `/api/health` for uptime monitoring.
+- **Environment Variable Support** — Configurable via `.env` (WhatsApp number, contact info, etc.) for easier deployment across environments.
+- **Error Handling & Resilience** — Integrated `ErrorBoundary` components and try-catch blocks for critical async operations (Lenis, video).
+- **Smooth scroll experience** — Lenis scroll hijacking for pixel-perfect scroll control.
+- **Autoplay Hero Video** — Background video autoplays in a seamless loop (no longer scroll-synced for smoother performance).
+- **Custom animated cursor** — Dot + ring cursor with hover states; scales on interactive elements.
+- **WhatsApp integration** — Floating action button backed by environment variables.
+- **Media gallery** — Categorized photo galleries with lightbox modal using typed data sources.
+- **Responsive design** — Mobile, tablet, desktop optimization via Tailwind CSS and improved typography for readability.
+- **Security & Headers** — Robust security headers (HSTS, X-Frame-Options, etc.) and `Cache-Control` for static assets.
 
 ## Tech Stack
 
@@ -53,22 +52,32 @@ The website prioritizes visual impact and user experience through sophisticated 
 
 ```
 ├── app/
-│   ├── page.tsx              # Home — hero, animated video, services grid, stats
-│   ├── about/page.tsx        # Company timeline (1965–2025), core values
-│   ├── services/page.tsx     # 7 detailed service offerings with features
-│   ├── contact/page.tsx      # Contact form (client-side validation only)
-│   ├── media/page.tsx        # Photo gallery categorized by service type
-│   ├── layout.tsx            # Root layout, metadata, font imports
-│   └── globals.css           # Global styles, CSS variables, animations
+│   ├── api/                  # Backend API routes
+│   │   ├── contact/route.ts  # POST /api/contact logic
+│   │   └── health/route.ts   # GET /api/health logic
+│   ├── page.tsx              # Home — hero with autoplay video, grid layout
+│   ├── about/page.tsx        # Company timeline, core values
+│   ├── services/page.tsx     # Service offerings with feature lists
+│   ├── contact/page.tsx      # Contact form (wired to API)
+│   ├── media/page.tsx        # Photo gallery
+│   ├── layout.tsx            # Metadata, providers, root structure
+│   └── globals.css           # Global Design System
 ├── components/
-│   ├── ClientProviders.tsx   # Wraps app with Lenis + UI components
-│   ├── Navbar.tsx            # Fixed header, scroll-aware backdrop blur
-│   ├── Footer.tsx            # Multi-column footer with links and contact info
-│   ├── LenisProvider.tsx    # Lenis scroll hijacking wrapper
-│   ├── CustomCursor.tsx      # Dot + ring cursor replacement
-│   ├── WhatsAppFloat.tsx    # Floating WhatsApp button
+│   ├── ErrorBoundary.tsx     # React Error Boundary fallback UI
+│   ├── Navbar.tsx            # Spaced header with mobile burger
+│   ├── Footer.tsx            # Optimized footer with high legibility
+│   ├── ClientProviders.tsx   # Composition wrapper (Lenis, ErrorBoundary)
+│   ├── LenisProvider.tsx    # Smooth scroll provider (with error handling)
+│   ├── CustomCursor.tsx      # Interactive cursor
+│   └── WhatsAppFloat.tsx    # Env-variable backed WhatsApp button
+├── lib/                      # Production logic
+│   ├── data.ts               # SINGLE SOURCE OF TRUTH for all site content
+│   ├── constants.ts          # Env-backed site constants (Phone, Email, etc.)
+│   ├── validation.ts         # Shared client/server validation schema
+├── types/
+│   └── index.ts              # TypeScript interfaces (Shared across project)
 └── hooks/
-    └── useScrollReveal.ts    # Intersection Observer hook for scroll animations
+    └── useScrollReveal.ts    # Intersection Observer hook for reveals
 ```
 
 ### Component Communication
@@ -128,9 +137,12 @@ The website prioritizes visual impact and user experience through sophisticated 
 
 ### Environment Variables
 
-No environment variables are required for basic functionality. If implementing backend form submission, set:
+Configure these in `.env.local` for development and in your hosting UI for production. See [.env.example](.env.example) for details.
+
 ```env
-NEXT_PUBLIC_CONTACT_API_ENDPOINT=https://your-api.com/contact
+NEXT_PUBLIC_WHATSAPP_PHONE=91XXXXXXXXXX
+NEXT_PUBLIC_PHONE_NUMBER=+91-XXXX-XXXXXX
+NEXT_PUBLIC_EMAIL=contact@upendrapublicity.com
 ```
 
 ## Usage
@@ -231,30 +243,30 @@ up/
 
 ## Future Improvements
 
-### High Priority (Before Production)
+### ✅ Completed (Phase 1 Remediation)
 
-- [ ] Implement backend API for contact form submission (e.g., Node.js/Express, Next.js API routes, or serverless function)
-- [ ] Add email notification system (send confirmation email to user + notification to team)
-- [ ] Replace placeholder gallery images with actual project photography
-- [ ] Set up analytics (Vercel Analytics, Google Analytics, or Mixpanel)
-- [ ] Implement proper form submission with CAPTCHA or rate limiting to prevent abuse
+- [x] Create centralized data layer (`lib/data.ts`) and TypeScript types
+- [x] Implement backend API routes (`/api/contact`, `/api/health`)
+- [x] Add server-side validation, sanitization, and rate limiting
+- [x] Implement environment variable management
+- [x] Integrate global Error Boundary and error handling
+- [x] Optimize UI readability (Footer/Navbar spacing and typography)
+- [x] Fix background video loop performance
 
-### Medium Priority
+### 🟡 Phase 2: Testing & Component Decomposition
 
-- [ ] Migrate hardcoded content to headless CMS (Strapi, Contentful) for easier updating
-- [ ] Add testimonials/case studies section with client logos and project metrics
-- [ ] Create admin dashboard for managing gallery, testimonials, and contact submissions
-- [ ] Add search functionality for services and locations
-- [ ] Implement service request booking form with calendar integration
+- [ ] Split `app/page.tsx` into smaller `/components/home/` sub-components
+- [ ] Configure testing framework (Vitest + React Testing Library)
+- [ ] Write unit tests for validation and core site components
+- [ ] Implement `sitemap.ts` and `robots.txt`
+- [ ] Create Privacy Policy page (Compliance)
 
-### Low Priority (Polish & Optimization)
+### 🔴 Phase 3: DevOps & Live Integrations
 
-- [ ] Optimize video filesize with WebM codec and lazy-loading
-- [ ] Add service worker for offline support
-- [ ] Implement progressive image loading (blur-up or LQIP)
-- [ ] Add accessibility audit (WCAG 2.1 AA compliance)
-- [ ] Create A/B testing framework for CTA conversion improvement
-- [ ] Add multi-language support (Hindi, Marathi)
+- [ ] Integrate real email delivery service (SendGrid/Nodemailer)
+- [ ] Implement database persistence (Prisma + PostgreSQL) for leads
+- [ ] Create `Dockerfile` and `docker-compose.yml`
+- [ ] Setup GitHub Actions CI/CD pipeline
 
 ## Deployment
 
