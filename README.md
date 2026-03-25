@@ -1,59 +1,318 @@
-# Upendra Publicity - UI/UX Portfolio Website
+# Upendra Publicity – Corporate Website
 
-A modern, responsive, and highly interactive portfolio website designed to showcase UI/UX design projects, developed with cutting-edge web technologies to deliver a premium user experience.
+A high-performance, premium marketing website for Upendra Publicity, Maharashtra's leading outdoor advertising agency. Built with Next.js, featuring advanced animations, smooth scrolling, and a modern dark design system.
 
-## ✨ Features
+## Project Overview
 
-- **Dark Theme Aesthetics:** Sleek, modern dark mode design with glassmorphism effects.
-- **Smooth Scrolling:** Powered by [Lenis](https://github.com/studio-freight/lenis) for a fluid, natural scroll experience.
-- **High-Performance Animations:** Complex scroll-linked animations and page transitions using [GSAP](https://gsap.com/) and [Framer Motion](https://www.framer.com/motion/).
-- **Responsive Design:** Fully optimized for desktop, tablet, and mobile viewing using [Tailwind CSS](https://tailwindcss.com/).
-- **Modern Architecture:** Built on top of [Next.js 15](https://nextjs.org/) (App Router) and [React 18](https://react.dev/).
-- **Interactive Elements:** Custom cursors, floating action buttons (WhatsApp integration), and dynamic video scrubbing backgrounds.
+Upendra Publicity is a B2B marketing website showcasing 60+ years of outdoor advertising expertise across Maharashtra. The site provides potential clients and partners with comprehensive information about advertising services (hoardings, railway, mall, airport, highway, and city advertising), company history, project portfolio, and contact options.
 
-## 🛠️ Tech Stack
+The website prioritizes visual impact and user experience through sophisticated scroll-linked animations, custom interaction elements, and a premium glassmorphic design language. It targets high-value corporate clients and brand managers seeking outdoor advertising solutions.
 
-- **Framework:** [Next.js 15.0.3](https://nextjs.org/) (App Router, TypeScript)
-- **Styling:** [Tailwind CSS 3.4](https://tailwindcss.com/)
-- **Animations:** 
-  - [GSAP 3.12](https://gsap.com/)
-  - [Framer Motion 11](https://www.framer.com/motion/)
-- **Scroll Hijacking:** [@studio-freight/lenis 1.0.42](https://github.com/studio-freight/lenis)
-- **Icons:** [Lucide React](https://lucide.dev/)
+## Implemented Features
 
-## 🚀 Getting Started
+- **Multi-page site structure** — Home, About, Services, Media gallery, Contact pages with client-side routing
+- **Scroll-linked video scrubbing** — Hero section video plays based on scroll position (requestAnimationFrame-driven)
+- **Smooth scroll experience** — Lenis scroll hijacking for pixel-perfect scroll control
+- **Scroll reveal animations** — Intersection Observer-based element reveal on scroll (manually triggered, not library-dependent)
+- **Custom animated cursor** — Dot + ring cursor with hover states; scales on interactive elements
+- **WhatsApp integration** — Floating action button for direct contact
+- **Contact form** — Client-side validation (email, phone, required fields) with honeypot anti-spam; **note: form data is not currently submitted to any backend**
+- **Media gallery** — Categorized photo galleries (hoardings, railway, mall, airport, highway, city) with lightbox modal
+- **Responsive design** — Mobile, tablet, desktop optimization via Tailwind CSS
+- **SEO optimization** — Metadata, Open Graph tags, robots directives, structured for search engines
+- **Security headers** — Content-Security-Policy, HSTS, X-Frame-Options, Permissions-Policy, referrer policy
+- **Dark theme UI** — Glassmorphic cards, cyan/blue electric accent colors, typography hierarchy
+
+## Tech Stack
+
+**Runtime:**
+- [Next.js 15.0.3](https://nextjs.org/) — React framework with App Router, TypeScript support
+- [React 18.3.1](https://react.dev/) — UI library
+- [TypeScript 5](https://www.typescriptlang.org/) — Static type checking
+
+**Styling & Design:**
+- [Tailwind CSS 3.4](https://tailwindcss.com/) — Utility-first CSS framework
+- [PostCSS 8.4](https://postcss.org/) — CSS transformation tool
+
+**Animations & Interactions:**
+- [GSAP 3.12.5](https://gsap.com/) — Professional animation library (reserved for future use)
+- [Framer Motion 11.11.11](https://www.framer.com/motion/) — React animation framework
+- [Lenis 1.0.42](https://github.com/studio-freight/lenis) — Smooth scroll library with scroll hijacking
+
+**UI Components:**
+- [Lucide React 0.460](https://lucide.dev/) — Icon library (20+ icons used)
+
+**Development:**
+- Node.js & npm (v18+)
+- ESLint (configured via Next.js)
+- Autoprefixer + PostCSS (CSS vendor prefixing)
+
+## Architecture & Design
+
+### Page Structure
+
+```
+├── app/
+│   ├── page.tsx              # Home — hero, animated video, services grid, stats
+│   ├── about/page.tsx        # Company timeline (1965–2025), core values
+│   ├── services/page.tsx     # 7 detailed service offerings with features
+│   ├── contact/page.tsx      # Contact form (client-side validation only)
+│   ├── media/page.tsx        # Photo gallery categorized by service type
+│   ├── layout.tsx            # Root layout, metadata, font imports
+│   └── globals.css           # Global styles, CSS variables, animations
+├── components/
+│   ├── ClientProviders.tsx   # Wraps app with Lenis + UI components
+│   ├── Navbar.tsx            # Fixed header, scroll-aware backdrop blur
+│   ├── Footer.tsx            # Multi-column footer with links and contact info
+│   ├── LenisProvider.tsx    # Lenis scroll hijacking wrapper
+│   ├── CustomCursor.tsx      # Dot + ring cursor replacement
+│   ├── WhatsAppFloat.tsx    # Floating WhatsApp button
+└── hooks/
+    └── useScrollReveal.ts    # Intersection Observer hook for scroll animations
+```
+
+### Component Communication
+
+- **Tree structure:** `ClientProviders` wraps all pages with global providers (Lenis, custom cursor, navbar/footer)
+- **Client-side routing:** Next.js App Router handles navigation without full page reloads
+- **Scroll state management:** Lenis provides global scroll events; individual components use Intersection Observer for local reveals
+- **Form handling:** Contact form is self-contained; validation happens client-side, submission is stubbed (see Known Limitations)
+
+### Key Implementation Details
+
+1. **Scroll-Linked Video** — Uses `requestAnimationFrame` loop to query scroll position and update video playback time:
+   ```javascript
+   currentTime = (scrollProgress × videoDuration)
+   ```
+
+2. **Smooth Scroll** — Lenis hijacks native scroll and applies easing. Components must use `window.scrollY` (not `window.pageYOffset`) for Lenis compatibility.
+
+3. **Scroll Reveals** — Intersection Observer detects when `.reveal` and `.stagger-children` elements enter viewport; `.revealed` class triggers CSS transitions.
+
+4. **Custom Cursor** — Tracks `mousemove` events, applies transforms. Hidden via `cursor: none` on `<html>`.
+
+5. **Form Validation** — Email regex, phone length check, honeypot field (hidden input that bots fill). No backend submission (see limitations).
+
+## Setup & Installation
 
 ### Prerequisites
 
-Ensure you have [Node.js](https://nodejs.org/) (v18 or higher) and `npm` installed on your machine.
+- Node.js v18+ and npm/yarn
+- Git (to clone the repository)
+- (Optional) Vercel CLI for deployment
 
-### Installation
+### Local Setup
 
-1. Clone the repository:
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/harshjaveri/up.git
-   cd upendra-publicity
+   cd up
    ```
 
-2. Install dependencies:
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. Start the development server:
+3. **Start development server:**
    ```bash
    npm run dev
    ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-4. Open your browser and visit [http://localhost:3000](http://localhost:3000) to see the application running.
+4. **Build for production:**
+   ```bash
+   npm run build
+   npm run start
+   ```
 
-## 📂 Project Structure
+### Environment Variables
 
-- `/app` - Next.js App Router pages (Home, About, Services, Media, Contact) and global layouts.
-- `/components` - Reusable UI components (Navbar, Footer, CustomCursor, LenisProvider, WhatsAppFloat, etc.).
-- `/hooks` - Custom React hooks for animations (`useScrollReveal.ts`).
-- `/public` - Static assets including images, logos, and videos.
+No environment variables are required for basic functionality. If implementing backend form submission, set:
+```env
+NEXT_PUBLIC_CONTACT_API_ENDPOINT=https://your-api.com/contact
+```
 
-## 📜 License
+## Usage
 
-This project is proprietary and confidential. All rights reserved.
+### Navigation
+
+- **Home (`/`)** — Hero with scroll-linked video, services overview, brand stats
+- **About (`/about`)** — Company history (timeline), core values
+- **Services (`/services`)** — Detailed breakdown of 7 advertising services with feature lists
+- **Media (`/media`)** — Photo gallery by advertising category
+- **Contact (`/contact`)** — Contact form (client-side validation; backend not implemented)
+
+### Contact Form (Current State)
+
+The contact form accepts:
+- Name, company, phone, email, service category, message
+- Client-side validation (email format, phone length, required fields)
+- Honeypot spam protection
+- **⚠️ Currently: Form validation & UI only. Data is not submitted anywhere.**
+
+To enable actual submissions, implement backend endpoint (see Known Limitations).
+
+### Scroll Interactions
+
+- Hover over interactive elements (links, buttons) to see cursor expansion
+- Scroll to trigger element reveal animations
+- On home page, scroll to scrub through hero video
+
+## Project Structure
+
+```
+up/
+├── app/                          # Next.js app directory (App Router)
+│   ├── page.tsx                 # Home page
+│   ├── about/page.tsx           # About page
+│   ├── services/page.tsx        # Services page
+│   ├── contact/page.tsx         # Contact page (form stub)
+│   ├── media/page.tsx           # Gallery page
+│   ├── layout.tsx               # Root layout + metadata
+│   └── globals.css              # Global styles, CSS variables
+├── components/                   # Reusable React components
+│   ├── ClientProviders.tsx      # Root context wrapper
+│   ├── Navbar.tsx               # Header navigation
+│   ├── Footer.tsx               # Footer
+│   ├── LenisProvider.tsx        # Smooth scroll wrapper
+│   ├── CustomCursor.tsx         # Custom cursor
+│   └── WhatsAppFloat.tsx        # Floating WhatsApp button
+├── hooks/                        # Custom React hooks
+│   └── useScrollReveal.ts       # Scroll-triggered reveal hook
+├── public/                       # Static assets (favicon, logo, etc.)
+├── package.json                  # Dependencies & scripts
+├── next.config.mjs              # Next.js configuration (security headers, CSP)
+├── tsconfig.json                # TypeScript configuration
+├── tailwind.config.ts           # Tailwind CSS configuration
+└── README.md                     # This file
+```
+
+### Key Files
+
+- [app/page.tsx](app/page.tsx) — Home page with complex scroll interactions and video scrubbing
+- [next.config.mjs](next.config.mjs) — Security headers (CSP, HSTS, X-Frame-Options)
+- [app/globals.css](app/globals.css) — Design system (colors, typography, animations)
+- [app/contact/page.tsx](app/contact/page.tsx) — Contact form (client-side validation; see line 84 TODO)
+
+## Known Limitations
+
+### Architectural
+
+1. **No backend** — Contact form validates client-side but does not submit data. Requires API endpoint implementation (see TODO at [app/contact/page.tsx#L84](app/contact/page.tsx#L84)).
+
+2. **No database** — All content is hardcoded in components. Adding new services, locations, or portfolio items requires code edits.
+
+3. **Gallery uses placeholder images** — Media gallery sources photos from Pexels/Unsplash via CDN. Replace with actual project photos for production.
+
+### Performance & UX
+
+4. **Scroll hijacking trade-off** — Lenis smooth scroll conflicts with native browser scroll restoration on navigation. Back button may not restore scroll position correctly.
+
+5. **No service worker/offline mode** — No progressive web app (PWA) features; site requires internet connection.
+
+6. **Memory usage** — Scroll reveal observer adds an Intersection Observer per page. At scale (100+ elements), consider observer pooling.
+
+### Security & Compliance
+
+7. **CSP relaxed for inline scripts** — `script-src 'unsafe-inline' 'unsafe-eval'` allows inline JavaScript (required by Framer Motion and GSAP). For stricter CSP, refactor animations to CSS-only or external scripts.
+
+8. **No CORS headers** — If proxying to external APIs, remember CORS/CORS preflight handling.
+
+9. **No form backend** — Contact form is vulnerable to abuse if real submission is added without rate limiting or CAPTCHA.
+
+### Scalability
+
+10. **No CMS integration** — Adding/updating services, testimonials, or portfolio requires code push. Consider headless CMS (Strapi, Contentful) for content management.
+
+11. **Video filesize** — Hero scroll-linked video preloads in memory. For large videos, consider lazy-loading or streaming.
+
+12. **Hardcoded brand data** — Stats, services, timeline are hardcoded arrays. No dynamic content source.
+
+## Future Improvements
+
+### High Priority (Before Production)
+
+- [ ] Implement backend API for contact form submission (e.g., Node.js/Express, Next.js API routes, or serverless function)
+- [ ] Add email notification system (send confirmation email to user + notification to team)
+- [ ] Replace placeholder gallery images with actual project photography
+- [ ] Set up analytics (Vercel Analytics, Google Analytics, or Mixpanel)
+- [ ] Implement proper form submission with CAPTCHA or rate limiting to prevent abuse
+
+### Medium Priority
+
+- [ ] Migrate hardcoded content to headless CMS (Strapi, Contentful) for easier updating
+- [ ] Add testimonials/case studies section with client logos and project metrics
+- [ ] Create admin dashboard for managing gallery, testimonials, and contact submissions
+- [ ] Add search functionality for services and locations
+- [ ] Implement service request booking form with calendar integration
+
+### Low Priority (Polish & Optimization)
+
+- [ ] Optimize video filesize with WebM codec and lazy-loading
+- [ ] Add service worker for offline support
+- [ ] Implement progressive image loading (blur-up or LQIP)
+- [ ] Add accessibility audit (WCAG 2.1 AA compliance)
+- [ ] Create A/B testing framework for CTA conversion improvement
+- [ ] Add multi-language support (Hindi, Marathi)
+
+## Deployment
+
+### Recommended Platforms
+
+- **Vercel** (optimal for Next.js) — Deploy via `git push`:
+  ```bash
+  npm install -g vercel
+  vercel
+  ```
+
+- **Netlify** — Configure `next export` in `next.config.mjs` for static export
+
+- **Docker** — Build container for self-hosted deployment
+
+### Environment Variables (if implemented)
+
+```bash
+# .env.local (development)
+NEXT_PUBLIC_CONTACT_API_ENDPOINT=http://localhost:3000/api/contact
+
+# Production
+NEXT_PUBLIC_CONTACT_API_ENDPOINT=https://upendrapublicity.com/api/contact
+NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
+```
+
+## Code Standards
+
+- **TypeScript strict mode** — All components typed
+- **Client-side components** — Marked with `'use client'` (Next.js 13+ convention)
+- **No external design system** — Custom Tailwind + CSS variables (see [globals.css](app/globals.css))
+- **Naming conventions:**
+  - Components: PascalCase (`CustomCursor.tsx`)
+  - Hooks: camelCase with `use` prefix (`useScrollReveal.ts`)
+  - CSS utilities: kebab-case (`.glass-card`, `.gradient-text`)
+
+## Screenshots / Demo
+
+Currently, the site is hosted at `https://upendrapublicity.com`. To add screenshots:
+
+1. Take high-quality PNG screenshots of key pages (home hero, services grid, contact form)
+2. Place in `public/screenshots/` directory
+3. Reference in README:
+   ```markdown
+   ![Home Hero](public/screenshots/hero.png)
+   ![Services](public/screenshots/services.png)
+   ```
+
+## Contributing
+
+This is a private project. For inquiries about features or bugs, please open an issue in the repository.
+
+## License
+
+Private project — Upendra Publicity. All rights reserved.
+
+---
+
+**Last Updated:** March 2025  
+**Maintainer:** [@harshjaveri](https://github.com/harshjaveri)  
+**Domain:** upendrapublicity.com
