@@ -1,7 +1,11 @@
+import { WHATSAPP_URL } from '@/lib/constants'
+
 export default function WhatsAppFloat() {
+  if (!WHATSAPP_URL) return null
+
   return (
     <a
-      href="https://wa.me/91XXXXXXXXXX?text=Hello%2C%20I%27m%20interested%20in%20outdoor%20advertising%20with%20Upendra%20Publicity."
+      href={WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
       className="whatsapp-float"

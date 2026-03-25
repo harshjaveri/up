@@ -3,22 +3,27 @@ import { useEffect } from 'react'
 
 export default function LenisProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    let lenis: any
+    let lenis: { raf: (time: number) => void; destroy: () => void } | null = null
     let rafId: number
 
     const init = async () => {
-      const Lenis = (await import('@studio-freight/lenis')).default
-      lenis = new Lenis({
-        duration: 1.2,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-      })
+      try {
+        const Lenis = (await import('@studio-freight/lenis')).default
+        lenis = new Lenis({
+          duration: 1.2,
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smoothWheel: true,
+        })
 
-      function raf(time: number) {
-        lenis.raf(time)
+        function raf(time: number) {
+          lenis?.raf(time)
+          rafId = requestAnimationFrame(raf)
+        }
         rafId = requestAnimationFrame(raf)
+      } catch (error) {
+        console.warn('[LenisProvider] Failed to load smooth scroll library:', error)
+        // Graceful fallback — page still works with native scroll
       }
-      rafId = requestAnimationFrame(raf)
     }
     init()
 
