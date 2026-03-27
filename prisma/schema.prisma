@@ -1,0 +1,27 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // SQLite for local development (zero setup)
+  // For production, switch to postgresql and set DATABASE_URL in .env
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ContactSubmission {
+  id        Int      @id @default(autoincrement())
+  name      String
+  company   String   @default("")
+  phone     String
+  email     String
+  service   String   @default("")
+  message   String
+  ip        String   @default("unknown")
+  createdAt DateTime @default(now())
+
+  @@map("contact_submissions")
+}
