@@ -1,23 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { ContactFormData, ApiResponse } from '@/types'
 import { validateContactForm, sanitizeContactForm } from '@/lib/validation'
+import { sendContactEmail } from '@/lib/email'
+import { prisma } from '@/lib/db'
 
 // ── In-memory rate limiter ──
-// Key: IP address → Array of timestamps
 const rateLimitMap = new Map<string, number[]>()
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000  // 1 hour
-const RATE_LIMIT_MAX = 5                       // 5 requests per window
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000 // 1 hour
+const RATE_LIMIT_MAX = 5
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now()
   const timestamps = rateLimitMap.get(ip) || []
-  // Remove entries older than the window
-  const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW_MS)
+  const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS)
   rateLimitMap.set(ip, recent)
-
-  if (recent.length >= RATE_LIMIT_MAX) {
-    return true
-  }
+  if (recent.length >= RATE_LIMIT_MAX) return true
   recent.push(now)
   rateLimitMap.set(ip, recent)
   return false
@@ -25,10 +22,10 @@ function isRateLimited(ip: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-      || request.headers.get('x-real-ip')
-      || 'unknown'
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      'unknown'
 
     if (isRateLimited(ip)) {
       const response: ApiResponse = {
@@ -38,7 +35,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 429 })
     }
 
-    // Parse body
     let body: Record<string, unknown>
     try {
       body = await request.json()
@@ -50,21 +46,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 400 })
     }
 
-    // Build form data with defaults for missing fields
     const formData: ContactFormData = {
-      name: String(body.name || ''),
+      name:    String(body.name    || ''),
       company: String(body.company || ''),
-      phone: String(body.phone || ''),
-      email: String(body.email || ''),
+      phone:   String(body.phone   || ''),
+      email:   String(body.email   || ''),
       service: String(body.service || ''),
       message: String(body.message || ''),
     }
 
-    // Sanitize
     const sanitized = sanitizeContactForm(formData)
-
-    // Validate
     const { valid, errors } = validateContactForm(sanitized)
+
     if (!valid) {
       const response: ApiResponse = {
         success: false,
@@ -74,14 +67,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 422 })
     }
 
-    // ── Process the submission ──
-    // TODO: Replace with real email service (SendGrid, Nodemailer, etc.)
-    // TODO: Replace with real database storage (Prisma, etc.)
-    console.log('[Contact Submission]', {
-      timestamp: new Date().toISOString(),
-      ip,
-      data: sanitized,
-    })
+    // ── Persist to database ──────────────────────────────────────────────
+    try {
+      await prisma.contactSubmission.create({
+        data: { ...sanitized, ip },
+      })
+    } catch (dbError) {
+      // Non-fatal — log and continue so email still fires
+      console.error('[Contact API] DB write failed:', dbError)
+    }
+
+    // ── Send email notifications ─────────────────────────────────────────
+    try {
+      await sendContactEmail(sanitized)
+    } catch (emailError) {
+      // Non-fatal — submission is already saved in DB, just log
+      console.error('[Contact API] Email send failed:', emailError)
+    }
 
     const response: ApiResponse = {
       success: true,
