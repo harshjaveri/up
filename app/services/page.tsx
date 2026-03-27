@@ -2,74 +2,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Check } from 'lucide-react'
-
-const services = [
-  {
-    icon: '🏗️',
-    title: 'Hoarding Advertising',
-    tag: 'Most Popular',
-    desc: 'Our flagship offering — massive 40×20 ft to 60×30 ft unipole and structure hoardings at Maharashtra\'s highest-footfall locations. Illuminated and non-illuminated options available.',
-    features: ['Premium backlit vinyl printing', 'Structural fabrication & installation', 'Monthly site verification photos', 'Footfall certification available'],
-    locations: '180+ prime hoarding locations',
-  },
-  {
-    icon: '🚂',
-    title: 'Railway Advertising',
-    desc: 'Capture commuters where they dwell — platforms, waiting areas, concourses, and foot-over bridges. Exclusive contracts across 14 Maharashtra railway stations.',
-    features: ['Platform banners & display boards', 'Foot-over bridge hoardings', 'Waiting room display panels', 'Train wrap advertising'],
-    locations: '14 railway stations covered',
-  },
-  {
-    icon: '🏬',
-    title: 'Mall Advertising',
-    desc: 'Indoor advertising at Maharashtra\'s premium shopping destinations. Atrium banners, escalator branding, food court displays, and mall entrance arches.',
-    features: ['Atrium & skylight banners', 'Digital screen placements', 'Pillar wraps & floor graphics', 'Entrance arch branding'],
-    locations: '8 malls across Maharashtra',
-  },
-  {
-    icon: '✈️',
-    title: 'Airport Advertising',
-    desc: 'Reach high-value business and leisure travellers at Maharashtra\'s airports. From check-in counters to baggage belts — total coverage for maximum brand recall.',
-    features: ['Arrival & departure hall panels', 'Baggage belt advertising', 'Check-in counter branding', 'Boarding gate displays'],
-    locations: '4 Maharashtra airports',
-  },
-  {
-    icon: '🛤️',
-    title: 'Highway Advertising',
-    desc: 'Unigaze hoardings on National Highway and State Highway corridors. Minimum 3-second visibility window guaranteed. Ideal for auto, travel, and lifestyle brands.',
-    features: ['NH & SH corridor locations', 'Minimum 3-sec visibility', 'GPS-tagged site data', 'Traffic count reports'],
-    locations: '300+ highway km covered',
-  },
-  {
-    icon: '🏙️',
-    title: 'City Advertising',
-    desc: 'Urban brand touchpoints across city centres, bus shelters, kiosks, and pedestrian-heavy zones. Perfect for retail, FMCG, and service sector campaigns.',
-    features: ['Bus shelter back panels', 'City kiosk advertising', 'Junction corner hoardings', 'Pedestrian zone banners'],
-    locations: '8 cities across Maharashtra',
-  },
-  {
-    icon: '🚉',
-    title: 'Railway Station Ads',
-    desc: 'Comprehensive advertising across station premises — from platform edges to enquiry counters. High repeat exposure for commuter-targeted campaigns.',
-    features: ['Platform edge boards', 'Enquiry & booking counter boards', 'Station entrance archways', 'Retiring room display panels'],
-    locations: '14 stations, 28 formats',
-  },
-  {
-    icon: '🖨️',
-    title: 'Hoarding Printing Services',
-    tag: 'In-House',
-    desc: 'Full in-house large-format printing facility. Vinyl, flex, digital, and canvas options with colour-accurate proofing. 72-hour print-to-install turnaround.',
-    features: ['Large-format digital UV printing', 'Backlit vinyl & frontlit flex', 'Solvent & eco-solvent inks', '72-hr turnaround guarantee'],
-    locations: 'In-house production unit, Aurangabad',
-  },
-]
-
-const process = [
-  { step: '01', title: 'Site Selection', desc: 'We identify locations based on your target audience, geography, and campaign objectives.' },
-  { step: '02', title: 'Creative Production', desc: 'Our in-house print facility produces campaign materials with colour-accurate proofing.' },
-  { step: '03', title: 'Installation', desc: 'Professional installation team deploys your campaign within the committed timeline.' },
-  { step: '04', title: 'Monitoring', desc: 'Regular photo reports and footfall data delivered to your dashboard throughout the campaign.' },
-]
+import { servicesDetailed, processSteps } from '@/lib/data'
 
 export default function ServicesPage() {
   useEffect(() => {
@@ -112,7 +45,7 @@ export default function ServicesPage() {
       {/* ── Services Grid ── */}
       <section className="py-16 px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 stagger-children">
-          {services.map((svc, i) => (
+          {servicesDetailed.map((svc) => (
             <div
               key={svc.title}
               className="glass-card p-8 group"
@@ -197,7 +130,7 @@ export default function ServicesPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
-            {process.map((p, i) => (
+            {processSteps.map((p, i) => (
               <div key={p.step} className="glass-card p-8 relative">
                 {/* Step Number */}
                 <div
@@ -216,7 +149,7 @@ export default function ServicesPage() {
                 <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)' }}>{p.desc}</p>
 
                 {/* Arrow connector */}
-                {i < process.length - 1 && (
+                {i < processSteps.length - 1 && (
                   <div
                     className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 z-10"
                     style={{ color: 'rgba(0,191,255,0.4)' }}

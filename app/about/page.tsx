@@ -3,46 +3,7 @@ import { useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-
-const timeline = [
-  {
-    year: '1965',
-    title: 'Foundation Year',
-    desc: 'Upendra Publicity founded in Aurangabad (now Chhatrapati Sambhajinagar). First hoarding erected at the city\'s prime commercial junction.',
-  },
-  {
-    year: '1978',
-    title: 'Regional Expansion',
-    desc: 'Extended operations across the Marathwada region. First railway station advertising contract with Indian Railways.',
-  },
-  {
-    year: '1992',
-    title: 'State-Wide Reach',
-    desc: 'Operations expanded to Pune, Nashik, and Nagpur. Signed first national brand partnerships including automotive and FMCG giants.',
-  },
-  {
-    year: '2003',
-    title: 'Infrastructure Upgrade',
-    desc: 'Introduced digital-grade backlit hoardings and large-format vinyl printing. First mall advertising partnerships in Aurangabad.',
-  },
-  {
-    year: '2015',
-    title: 'Digital Integration',
-    desc: 'Launched campaign monitoring dashboards for clients. Airport advertising contracts across Maharashtra\'s tier-2 airports.',
-  },
-  {
-    year: '2025',
-    title: 'Modern Maharashtra',
-    desc: '500+ active display locations across 18 districts. Trusted by 200+ brands nationally with a full-service outdoor advertising suite.',
-  },
-]
-
-const values = [
-  { icon: '🎯', title: 'Precision Placement', desc: 'Every location selected on verified footfall data and audience demographics.' },
-  { icon: '🤝', title: 'Long-term Partnerships', desc: 'We build decades-long relationships, not just campaigns.' },
-  { icon: '⚡', title: '24-Hour Execution', desc: 'From brief to live campaign — our turnaround is unmatched in the industry.' },
-  { icon: '📊', title: 'Data-Driven Results', desc: 'Every campaign backed by visibility metrics and brand recall data.' },
-]
+import { timeline, values } from '@/lib/data'
 
 export default function AboutPage() {
   useEffect(() => {
@@ -96,7 +57,7 @@ export default function AboutPage() {
           <div className="reveal">
             <div className="section-eyebrow mb-4">Who We Are</div>
             <h2 className="section-title text-white mb-6" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
-              Maharashtra's Most{' '}
+              Maharashtra&apos;s Most{' '}
               <span className="gradient-text">Trusted Name</span>{' '}
               in Outdoor Advertising
             </h2>
@@ -126,7 +87,7 @@ export default function AboutPage() {
               className="text-5xl mb-6 font-bold"
               style={{ color: 'rgba(0,191,255,0.3)', fontFamily: 'var(--font-display)' }}
             >
-              "
+              &quot;
             </div>
             <p
               className="text-xl leading-relaxed mb-6 text-white"
@@ -281,7 +242,7 @@ export default function AboutPage() {
           }}
         >
           <h2 className="section-title text-white mb-4" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
-            Partner With <span className="gradient-text">Maharashtra's Best</span>
+            Partner With <span className="gradient-text">Maharashtra&apos;s Best</span>
           </h2>
           <p className="mb-8 text-base" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)' }}>
             Join 200+ brands who trust Upendra Publicity with their outdoor presence.

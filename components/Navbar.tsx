@@ -4,14 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
-
-const links = [
-  { href: '/',         label: 'Home' },
-  { href: '/about',    label: 'About' },
-  { href: '/media',    label: 'Media' },
-  { href: '/services', label: 'Services' },
-  { href: '/contact',  label: 'Contact' },
-]
+import { navLinks } from '@/lib/data'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -48,12 +41,12 @@ export default function Navbar() {
             <div>
               <div
                 className="leading-tight"
-                style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '.95rem', color: '#fff', letterSpacing: '-.01em' }}
+                style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', color: '#fff', letterSpacing: '-.01em' }}
               >
                 Upendra Publicity
               </div>
               <div
-                style={{ fontFamily: 'var(--font-mono)', fontSize: '.6rem', color: 'var(--color-blue-electric)', letterSpacing: '.14em', opacity: .8 }}
+                style={{ fontFamily: 'var(--font-mono)', fontSize: '.7rem', color: 'var(--color-blue-electric)', letterSpacing: '.15em', fontWeight: 600, opacity: 0.9 }}
               >
                 Est. 1965 · Maharashtra
               </div>
@@ -62,19 +55,19 @@ export default function Navbar() {
         </div>
 
         {/* Center Section: Main Nav Links */}
-        <div className="hidden lg:flex items-center gap-1">
-          {links.map(link => (
+        <div className="hidden lg:flex items-center gap-2">
+          {navLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
-              className="px-4 py-2 rounded-full text-sm transition-all duration-250"
+              className="px-5 py-2.5 rounded-full transition-all duration-300"
               style={{
                 fontFamily: 'var(--font-display)',
                 fontWeight: pathname === link.href ? 600 : 400,
-                fontSize: '.82rem',
-                letterSpacing: '.02em',
-                color: pathname === link.href ? '#fff' : 'rgba(255,255,255,.55)',
-                background: pathname === link.href ? 'rgba(255,255,255,.06)' : 'transparent',
+                fontSize: '.9rem',
+                letterSpacing: '.03em',
+                color: pathname === link.href ? '#fff' : 'rgba(255,255,255,.5)',
+                background: pathname === link.href ? 'rgba(255,255,255,.08)' : 'transparent',
               }}
               onMouseEnter={e => {
                 const t = e.currentTarget as HTMLAnchorElement
@@ -91,9 +84,9 @@ export default function Navbar() {
         </div>
 
         {/* Right Section: Get a Quote & Mobile Burger */}
-        <div className="flex-1 flex justify-end items-center gap-4">
+        <div className="flex-1 flex justify-end items-center gap-6">
           <Link href="/contact" className="hidden lg:block">
-            <button className="btn-primary" style={{ padding: '11px 24px', fontSize: '.82rem' }}>
+            <button className="btn-primary" style={{ padding: '12px 28px', fontSize: '.9rem', fontWeight: 600 }}>
               Get a Quote
             </button>
           </Link>
@@ -121,7 +114,7 @@ export default function Navbar() {
         }}
       >
         <div className="flex flex-col items-center justify-center h-full gap-8 pt-20">
-          {links.map(link => (
+          {navLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
