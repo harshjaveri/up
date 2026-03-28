@@ -36,13 +36,15 @@ The website prioritizes visual impact and user experience through sophisticated 
 **Animations & Interactions:**
 - [GSAP 3.12.5](https://gsap.com/) — Professional animation library (reserved for future use)
 - [Framer Motion 11.11.11](https://www.framer.com/motion/) — React animation framework
-- [Lenis 1.0.42](https://github.com/studio-freight/lenis) — Smooth scroll library with scroll hijacking
+- [Lenis](https://www.npmjs.com/package/lenis) — Smooth scroll library with scroll hijacking
 
 **UI Components:**
 - [Lucide React 0.460](https://lucide.dev/) — Icon library (20+ icons used)
 
 **Development:**
 - Node.js & npm (v18+)
+- [Prisma 6](https://www.prisma.io/) — ORM for database access (SQLite dev / PostgreSQL prod)
+- [Nodemailer 8](https://nodemailer.com/) — Email delivery for contact form submissions
 - ESLint (configured via Next.js)
 - Autoprefixer + PostCSS (CSS vendor prefixing)
 
@@ -53,27 +55,42 @@ The website prioritizes visual impact and user experience through sophisticated 
 ```
 ├── app/
 │   ├── api/                  # Backend API routes
-│   │   ├── contact/route.ts  # POST /api/contact logic
-│   │   └── health/route.ts   # GET /api/health logic
-│   ├── page.tsx              # Home — hero with autoplay video, grid layout
+│   │   ├── contact/route.ts  # POST /api/contact (validation + email + DB)
+│   │   └── health/route.ts   # GET /api/health
+│   ├── page.tsx              # Home — delegates to home/ sub-components
 │   ├── about/page.tsx        # Company timeline, core values
 │   ├── services/page.tsx     # Service offerings with feature lists
 │   ├── contact/page.tsx      # Contact form (wired to API)
 │   ├── media/page.tsx        # Photo gallery
+│   ├── privacy/page.tsx      # Privacy Policy
 │   ├── layout.tsx            # Metadata, providers, root structure
-│   └── globals.css           # Global Design System
+│   ├── globals.css           # Global Design System
+│   ├── sitemap.ts            # Dynamic sitemap generation
+│   └── robots.ts             # robots.txt generation
 ├── components/
+│   ├── home/                 # Home page sub-components
+│   │   ├── HomeBackground.tsx
+│   │   ├── HeroSection.tsx
+│   │   ├── StatsSection.tsx
+│   │   ├── ServicesSection.tsx
+│   │   ├── BrandsMarquee.tsx
+│   │   ├── WhySection.tsx
+│   │   └── CtaBanner.tsx
 │   ├── ErrorBoundary.tsx     # React Error Boundary fallback UI
 │   ├── Navbar.tsx            # Spaced header with mobile burger
 │   ├── Footer.tsx            # Optimized footer with high legibility
 │   ├── ClientProviders.tsx   # Composition wrapper (Lenis, ErrorBoundary)
-│   ├── LenisProvider.tsx    # Smooth scroll provider (with error handling)
+│   ├── LenisProvider.tsx     # Smooth scroll provider (with error handling)
 │   ├── CustomCursor.tsx      # Interactive cursor
-│   └── WhatsAppFloat.tsx    # Env-variable backed WhatsApp button
+│   └── WhatsAppFloat.tsx     # Env-variable backed WhatsApp button
 ├── lib/                      # Production logic
 │   ├── data.ts               # SINGLE SOURCE OF TRUTH for all site content
 │   ├── constants.ts          # Env-backed site constants (Phone, Email, etc.)
-│   ├── validation.ts         # Shared client/server validation schema
+│   ├── db.ts                 # Prisma client singleton
+│   ├── email.ts              # Nodemailer email service
+│   └── validation.ts         # Shared client/server validation schema
+├── prisma/
+│   └── schema.prisma         # Database schema (ContactSubmission model)
 ├── types/
 │   └── index.ts              # TypeScript interfaces (Shared across project)
 └── hooks/
@@ -137,12 +154,24 @@ The website prioritizes visual impact and user experience through sophisticated 
 
 ### Environment Variables
 
-Configure these in `.env.local` for development and in your hosting UI for production. See [.env.example](.env.example) for details.
+Configure these in `.env.local` for development and in your Vercel dashboard for production. See [.env.example](.env.example) for details.
 
 ```env
+# Site
+NEXT_PUBLIC_SITE_URL=https://upendrapublicity.com
 NEXT_PUBLIC_WHATSAPP_PHONE=91XXXXXXXXXX
 NEXT_PUBLIC_PHONE_NUMBER=+91-XXXX-XXXXXX
-NEXT_PUBLIC_EMAIL=contact@upendrapublicity.com
+NEXT_PUBLIC_EMAIL=info@upendrapublicity.com
+
+# SMTP (for contact form emails)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=youraddress@gmail.com
+SMTP_PASS=your-16-char-app-password
+ADMIN_EMAIL=youraddress@gmail.com
+
+# Database
+DATABASE_URL="file:./dev.db"
 ```
 
 ## Usage
@@ -153,17 +182,16 @@ NEXT_PUBLIC_EMAIL=contact@upendrapublicity.com
 - **About (`/about`)** — Company history (timeline), core values
 - **Services (`/services`)** — Detailed breakdown of 7 advertising services with feature lists
 - **Media (`/media`)** — Photo gallery by advertising category
-- **Contact (`/contact`)** — Contact form (client-side validation; backend not implemented)
+- **Contact (`/contact`)** — Contact form with backend submission
+- **Privacy (`/privacy`)** — Privacy Policy page
 
-### Contact Form (Current State)
+### Contact Form
 
 The contact form accepts:
 - Name, company, phone, email, service category, message
-- Client-side validation (email format, phone length, required fields)
-- Honeypot spam protection
-- **⚠️ Currently: Form validation & UI only. Data is not submitted anywhere.**
-
-To enable actual submissions, implement backend endpoint (see Known Limitations).
+- Client-side + server-side validation
+- Honeypot spam protection & rate limiting
+- Submissions are saved to the database (Prisma) and emailed to the admin (Nodemailer)
 
 ### Scroll Interactions
 
@@ -176,25 +204,39 @@ To enable actual submissions, implement backend endpoint (see Known Limitations)
 ```
 up/
 ├── app/                          # Next.js app directory (App Router)
-│   ├── page.tsx                 # Home page
+│   ├── page.tsx                 # Home page (composed from home/ sub-components)
 │   ├── about/page.tsx           # About page
 │   ├── services/page.tsx        # Services page
-│   ├── contact/page.tsx         # Contact page (form stub)
+│   ├── contact/page.tsx         # Contact page
 │   ├── media/page.tsx           # Gallery page
+│   ├── privacy/page.tsx         # Privacy Policy page
+│   ├── api/contact/route.ts     # Contact form API endpoint
+│   ├── api/health/route.ts      # Health check endpoint
+│   ├── sitemap.ts               # Dynamic sitemap
+│   ├── robots.ts                # robots.txt
 │   ├── layout.tsx               # Root layout + metadata
 │   └── globals.css              # Global styles, CSS variables
 ├── components/                   # Reusable React components
+│   ├── home/                    # Home page sub-components (7 files)
 │   ├── ClientProviders.tsx      # Root context wrapper
 │   ├── Navbar.tsx               # Header navigation
 │   ├── Footer.tsx               # Footer
 │   ├── LenisProvider.tsx        # Smooth scroll wrapper
 │   ├── CustomCursor.tsx         # Custom cursor
 │   └── WhatsAppFloat.tsx        # Floating WhatsApp button
+├── lib/                          # Business logic
+│   ├── data.ts                  # Centralized site content
+│   ├── db.ts                    # Prisma client singleton
+│   ├── email.ts                 # Email service (Nodemailer)
+│   ├── constants.ts             # Env-backed constants
+│   └── validation.ts            # Shared validation schema
+├── prisma/                       # Database schema
+│   └── schema.prisma            # Prisma schema (SQLite/PostgreSQL)
 ├── hooks/                        # Custom React hooks
 │   └── useScrollReveal.ts       # Scroll-triggered reveal hook
-├── public/                       # Static assets (favicon, logo, etc.)
+├── public/                       # Static assets (favicon, logo, videos)
 ├── package.json                  # Dependencies & scripts
-├── next.config.mjs              # Next.js configuration (security headers, CSP)
+├── next.config.mjs              # Next.js configuration (security headers)
 ├── tsconfig.json                # TypeScript configuration
 ├── tailwind.config.ts           # Tailwind CSS configuration
 └── README.md                     # This file
@@ -209,41 +251,29 @@ up/
 
 ## Known Limitations
 
-### Architectural
+### Performance & UX
 
-1. **No backend** — Contact form validates client-side but does not submit data. Requires API endpoint implementation (see TODO at [app/contact/page.tsx#L84](app/contact/page.tsx#L84)).
+1. **Scroll hijacking trade-off** — Lenis smooth scroll conflicts with native browser scroll restoration on navigation. Back button may not restore scroll position correctly.
 
-2. **No database** — All content is hardcoded in components. Adding new services, locations, or portfolio items requires code edits.
+2. **No service worker/offline mode** — No progressive web app (PWA) features; site requires internet connection.
 
 3. **Gallery uses placeholder images** — Media gallery sources photos from Pexels/Unsplash via CDN. Replace with actual project photos for production.
 
-### Performance & UX
-
-4. **Scroll hijacking trade-off** — Lenis smooth scroll conflicts with native browser scroll restoration on navigation. Back button may not restore scroll position correctly.
-
-5. **No service worker/offline mode** — No progressive web app (PWA) features; site requires internet connection.
-
-6. **Memory usage** — Scroll reveal observer adds an Intersection Observer per page. At scale (100+ elements), consider observer pooling.
-
 ### Security & Compliance
 
-7. **CSP relaxed for inline scripts** — `script-src 'unsafe-inline' 'unsafe-eval'` allows inline JavaScript (required by Framer Motion and GSAP). For stricter CSP, refactor animations to CSS-only or external scripts.
-
-8. **No CORS headers** — If proxying to external APIs, remember CORS/CORS preflight handling.
-
-9. **No form backend** — Contact form is vulnerable to abuse if real submission is added without rate limiting or CAPTCHA.
+4. **CSP relaxed for inline scripts** — `script-src 'unsafe-inline' 'unsafe-eval'` allows inline JavaScript (required by Framer Motion and GSAP).
 
 ### Scalability
 
-10. **No CMS integration** — Adding/updating services, testimonials, or portfolio requires code push. Consider headless CMS (Strapi, Contentful) for content management.
+5. **No CMS integration** — Adding/updating services, testimonials, or portfolio requires code push. Consider headless CMS (Strapi, Contentful) for content management.
 
-11. **Video filesize** — Hero scroll-linked video preloads in memory. For large videos, consider lazy-loading or streaming.
+6. **Video filesize** — Background videos preload in memory. For large videos, consider lazy-loading or streaming.
 
-12. **Hardcoded brand data** — Stats, services, timeline are hardcoded arrays. No dynamic content source.
+7. **Hardcoded brand data** — Stats, services, timeline are hardcoded arrays in `lib/data.ts`.
 
 ## Future Improvements
 
-### ✅ Completed (Phase 1 Remediation)
+### ✅ Completed
 
 - [x] Create centralized data layer (`lib/data.ts`) and TypeScript types
 - [x] Implement backend API routes (`/api/contact`, `/api/health`)
@@ -252,21 +282,21 @@ up/
 - [x] Integrate global Error Boundary and error handling
 - [x] Optimize UI readability (Footer/Navbar spacing and typography)
 - [x] Fix background video loop performance
+- [x] Split `app/page.tsx` into `/components/home/` sub-components
+- [x] Configure testing framework (Vitest + React Testing Library)
+- [x] Implement `sitemap.ts` and `robots.ts`
+- [x] Create Privacy Policy page
+- [x] Integrate email delivery (Nodemailer)
+- [x] Implement database persistence (Prisma + SQLite) for contact leads
+- [x] Deploy on Vercel
 
-### 🟡 Phase 2: Testing & Component Decomposition
+### 🟡 Upcoming
 
-- [ ] Split `app/page.tsx` into smaller `/components/home/` sub-components
-- [ ] Configure testing framework (Vitest + React Testing Library)
 - [ ] Write unit tests for validation and core site components
-- [ ] Implement `sitemap.ts` and `robots.txt`
-- [ ] Create Privacy Policy page (Compliance)
-
-### 🔴 Phase 3: DevOps & Live Integrations
-
-- [ ] Integrate real email delivery service (SendGrid/Nodemailer)
-- [ ] Implement database persistence (Prisma + PostgreSQL) for leads
+- [ ] Replace gallery placeholder images with real project photos
 - [ ] Create `Dockerfile` and `docker-compose.yml`
 - [ ] Setup GitHub Actions CI/CD pipeline
+- [ ] Migrate database to PostgreSQL for production
 
 ## Deployment
 
@@ -325,6 +355,6 @@ Private project — Upendra Publicity. All rights reserved.
 
 ---
 
-**Last Updated:** March 2025  
+**Last Updated:** March 2026  
 **Maintainer:** [@harshjaveri](https://github.com/harshjaveri)  
 **Domain:** upendrapublicity.com
